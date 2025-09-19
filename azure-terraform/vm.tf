@@ -27,6 +27,7 @@ resource "azurerm_network_interface" "infra_dev_weu_app_nic" {
     name                          = "internal"
     subnet_id                     = azurerm_subnet.infra_dev_weu_app_subnet.id
     private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.infra_dev_weu_app_pubip.id
   }
 }
 
@@ -45,6 +46,7 @@ resource "azurerm_linux_virtual_machine" "infra_dev_weu_app_vm" {
     public_key = file("/home/chuks/.ssh/id_rsa.pub")
   }
 
+
   os_disk {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
@@ -55,5 +57,21 @@ resource "azurerm_linux_virtual_machine" "infra_dev_weu_app_vm" {
     offer     = "debian-11"
     sku       = "11-gen2"
     version   = "latest"
+  }
+}
+
+resource "azurerm_resource_group" "example" {
+  name     = "example-resources"
+  location = "West Europe"
+}
+
+resource "azurerm_public_ip" "infra_dev_weu_app_pubip" {
+  name                = "acceptanceTestPublicIp1"
+  resource_group_name = azurerm_resource_group.infra_dev_rg.name
+  location            = azurerm_resource_group.infra_dev_rg.location
+  allocation_method   = "Static"
+
+  tags = {
+    environment = "development"
   }
 }
